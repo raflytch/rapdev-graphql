@@ -3,7 +3,7 @@ package usecase
 import (
 	"context"
 
-	"rapdev-graphql/internal/domain"
+	"rapdev-graphql/pkg/domain"
 )
 
 type ProjectUsecase struct {

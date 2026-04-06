@@ -3,7 +3,7 @@ package graphqldelivery
 import (
 	"context"
 
-	"rapdev-graphql/internal/domain"
+	"rapdev-graphql/pkg/domain"
 
 	"github.com/graphql-go/graphql"
 )

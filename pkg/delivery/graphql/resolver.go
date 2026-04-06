@@ -1,7 +1,7 @@
 package graphqldelivery
 
 import (
-	"rapdev-graphql/internal/usecase"
+	"rapdev-graphql/pkg/usecase"
 )
 
 type Resolver struct {

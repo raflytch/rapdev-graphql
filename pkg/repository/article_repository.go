@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	"rapdev-graphql/internal/domain"
+	"rapdev-graphql/pkg/domain"
 )
 
 type articleRepository struct {

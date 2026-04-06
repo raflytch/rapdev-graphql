@@ -3,10 +3,10 @@ package app
 import (
 	"log"
 
-	"rapdev-graphql/internal/config"
-	graphqldelivery "rapdev-graphql/internal/delivery/graphql"
-	"rapdev-graphql/internal/repository"
-	"rapdev-graphql/internal/usecase"
+	"rapdev-graphql/pkg/config"
+	graphqldelivery "rapdev-graphql/pkg/delivery/graphql"
+	"rapdev-graphql/pkg/repository"
+	"rapdev-graphql/pkg/usecase"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"

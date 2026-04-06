@@ -3,7 +3,7 @@ package handler
 import (
 	"net/http"
 
-	"rapdev-graphql/internal/app"
+	"rapdev-graphql/pkg/app"
 
 	"github.com/gofiber/fiber/v2/middleware/adaptor"
 )

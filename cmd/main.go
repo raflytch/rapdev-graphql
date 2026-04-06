@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"rapdev-graphql/internal/app"
+	"rapdev-graphql/pkg/app"
 
 	"github.com/joho/godotenv"
 )
