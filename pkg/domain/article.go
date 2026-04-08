@@ -20,5 +20,5 @@ type Article struct {
 }
 
 type ArticleRepository interface {
-	FindAll(ctx context.Context) ([]Article, error)
+	FindAll(ctx context.Context, params PaginationParams) (PaginatedResult[Article], error)
 }

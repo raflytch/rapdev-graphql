@@ -17,17 +17,24 @@ func NewEducationRepository(db *sql.DB) domain.EducationRepository {
 	return &educationRepository{db: db}
 }
 
-func (r *educationRepository) FindAll(ctx context.Context) ([]domain.Education, error) {
+func (r *educationRepository) FindAll(ctx context.Context, params domain.PaginationParams) (domain.PaginatedResult[domain.Education], error) {
+	var totalCount int
+	countQuery := `SELECT COUNT(*) FROM educations`
+	if err := r.db.QueryRowContext(ctx, countQuery).Scan(&totalCount); err != nil {
+		return domain.PaginatedResult[domain.Education]{}, err
+	}
+
 	query := `
 		SELECT id, institution, degree, logo, "startDate", "endDate", gpa, achievements,
 		       "createdAt", "updatedAt"
 		FROM educations
 		ORDER BY "startDate" DESC
+		LIMIT $1 OFFSET $2
 	`
 
-	rows, err := r.db.QueryContext(ctx, query)
+	rows, err := r.db.QueryContext(ctx, query, params.Limit, params.Offset())
 	if err != nil {
-		return nil, err
+		return domain.PaginatedResult[domain.Education]{}, err
 	}
 	defer rows.Close()
 
@@ -40,14 +47,14 @@ func (r *educationRepository) FindAll(ctx context.Context) ([]domain.Education, 
 			&e.GPA, pq.Array(&e.Achievements), &e.CreatedAt, &e.UpdatedAt,
 		)
 		if err != nil {
-			return nil, err
+			return domain.PaginatedResult[domain.Education]{}, err
 		}
 		educations = append(educations, e)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return domain.PaginatedResult[domain.Education]{}, err
 	}
 
-	return educations, nil
+	return domain.NewPaginatedResult(educations, totalCount, params), nil
 }

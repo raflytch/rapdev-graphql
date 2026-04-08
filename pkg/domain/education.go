@@ -19,5 +19,5 @@ type Education struct {
 }
 
 type EducationRepository interface {
-	FindAll(ctx context.Context) ([]Education, error)
+	FindAll(ctx context.Context, params PaginationParams) (PaginatedResult[Education], error)
 }

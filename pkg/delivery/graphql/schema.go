@@ -26,80 +26,116 @@ func NewSchema(r *Resolver) (graphql.Schema, error) {
 	})
 }
 
+func extractPaginationParams(p graphql.ResolveParams) domain.PaginationParams {
+	page := 1
+	limit := 10
+	if v, ok := p.Args["page"].(int); ok {
+		page = v
+	}
+	if v, ok := p.Args["limit"].(int); ok {
+		limit = v
+	}
+	return domain.NewPaginationParams(page, limit)
+}
+
+func toPaginatedResponse(data []map[string]interface{}, totalCount, page, limit, totalPages int) map[string]interface{} {
+	return map[string]interface{}{
+		"data": data,
+		"pageInfo": map[string]interface{}{
+			"totalCount": totalCount,
+			"page":       page,
+			"limit":      limit,
+			"totalPages": totalPages,
+		},
+	}
+}
+
 func buildArticlesField(r *Resolver) *graphql.Field {
 	return &graphql.Field{
-		Type: graphql.NewList(ArticleType),
+		Type: PaginatedArticleType,
+		Args: PaginationArgs,
 		Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-			articles, err := r.ArticleUsecase.GetAll(resolveContext(p))
+			params := extractPaginationParams(p)
+			result, err := r.ArticleUsecase.GetAll(resolveContext(p), params)
 			if err != nil {
 				return nil, err
 			}
-			return toArticleMaps(articles), nil
+			return toPaginatedResponse(toArticleMaps(result.Data), result.TotalCount, result.Page, result.Limit, result.TotalPages), nil
 		},
 	}
 }
 
 func buildEducationsField(r *Resolver) *graphql.Field {
 	return &graphql.Field{
-		Type: graphql.NewList(EducationType),
+		Type: PaginatedEducationType,
+		Args: PaginationArgs,
 		Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-			educations, err := r.EducationUsecase.GetAll(resolveContext(p))
+			params := extractPaginationParams(p)
+			result, err := r.EducationUsecase.GetAll(resolveContext(p), params)
 			if err != nil {
 				return nil, err
 			}
-			return toEducationMaps(educations), nil
+			return toPaginatedResponse(toEducationMaps(result.Data), result.TotalCount, result.Page, result.Limit, result.TotalPages), nil
 		},
 	}
 }
 
 func buildExperiencesField(r *Resolver) *graphql.Field {
 	return &graphql.Field{
-		Type: graphql.NewList(ExperienceType),
+		Type: PaginatedExperienceType,
+		Args: PaginationArgs,
 		Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-			experiences, err := r.ExperienceUsecase.GetAll(resolveContext(p))
+			params := extractPaginationParams(p)
+			result, err := r.ExperienceUsecase.GetAll(resolveContext(p), params)
 			if err != nil {
 				return nil, err
 			}
-			return toExperienceMaps(experiences), nil
+			return toPaginatedResponse(toExperienceMaps(result.Data), result.TotalCount, result.Page, result.Limit, result.TotalPages), nil
 		},
 	}
 }
 
 func buildProjectsField(r *Resolver) *graphql.Field {
 	return &graphql.Field{
-		Type: graphql.NewList(ProjectType),
+		Type: PaginatedProjectType,
+		Args: PaginationArgs,
 		Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-			projects, err := r.ProjectUsecase.GetAll(resolveContext(p))
+			params := extractPaginationParams(p)
+			result, err := r.ProjectUsecase.GetAll(resolveContext(p), params)
 			if err != nil {
 				return nil, err
 			}
-			return toProjectMaps(projects), nil
+			return toPaginatedResponse(toProjectMaps(result.Data), result.TotalCount, result.Page, result.Limit, result.TotalPages), nil
 		},
 	}
 }
 
 func buildGalleriesField(r *Resolver) *graphql.Field {
 	return &graphql.Field{
-		Type: graphql.NewList(GalleryType),
+		Type: PaginatedGalleryType,
+		Args: PaginationArgs,
 		Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-			galleries, err := r.GalleryUsecase.GetAll(resolveContext(p))
+			params := extractPaginationParams(p)
+			result, err := r.GalleryUsecase.GetAll(resolveContext(p), params)
 			if err != nil {
 				return nil, err
 			}
-			return toGalleryMaps(galleries), nil
+			return toPaginatedResponse(toGalleryMaps(result.Data), result.TotalCount, result.Page, result.Limit, result.TotalPages), nil
 		},
 	}
 }
 
 func buildSocialLinksField(r *Resolver) *graphql.Field {
 	return &graphql.Field{
-		Type: graphql.NewList(SocialLinkType),
+		Type: PaginatedSocialLinkType,
+		Args: PaginationArgs,
 		Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-			links, err := r.SocialLinkUsecase.GetAll(resolveContext(p))
+			params := extractPaginationParams(p)
+			result, err := r.SocialLinkUsecase.GetAll(resolveContext(p), params)
 			if err != nil {
 				return nil, err
 			}
-			return toSocialLinkMaps(links), nil
+			return toPaginatedResponse(toSocialLinkMaps(result.Data), result.TotalCount, result.Page, result.Limit, result.TotalPages), nil
 		},
 	}
 }

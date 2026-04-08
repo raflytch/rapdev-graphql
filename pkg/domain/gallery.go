@@ -15,5 +15,5 @@ type Gallery struct {
 }
 
 type GalleryRepository interface {
-	FindAll(ctx context.Context) ([]Gallery, error)
+	FindAll(ctx context.Context, params PaginationParams) (PaginatedResult[Gallery], error)
 }

@@ -17,17 +17,24 @@ func NewExperienceRepository(db *sql.DB) domain.ExperienceRepository {
 	return &experienceRepository{db: db}
 }
 
-func (r *experienceRepository) FindAll(ctx context.Context) ([]domain.Experience, error) {
+func (r *experienceRepository) FindAll(ctx context.Context, params domain.PaginationParams) (domain.PaginatedResult[domain.Experience], error) {
+	var totalCount int
+	countQuery := `SELECT COUNT(*) FROM experiences`
+	if err := r.db.QueryRowContext(ctx, countQuery).Scan(&totalCount); err != nil {
+		return domain.PaginatedResult[domain.Experience]{}, err
+	}
+
 	query := `
 		SELECT id, company, position, "type", logo, "startDate", "endDate", tags, description,
 		       "createdAt", "updatedAt"
 		FROM experiences
 		ORDER BY "startDate" DESC
+		LIMIT $1 OFFSET $2
 	`
 
-	rows, err := r.db.QueryContext(ctx, query)
+	rows, err := r.db.QueryContext(ctx, query, params.Limit, params.Offset())
 	if err != nil {
-		return nil, err
+		return domain.PaginatedResult[domain.Experience]{}, err
 	}
 	defer rows.Close()
 
@@ -40,14 +47,14 @@ func (r *experienceRepository) FindAll(ctx context.Context) ([]domain.Experience
 			pq.Array(&e.Tags), pq.Array(&e.Description), &e.CreatedAt, &e.UpdatedAt,
 		)
 		if err != nil {
-			return nil, err
+			return domain.PaginatedResult[domain.Experience]{}, err
 		}
 		experiences = append(experiences, e)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return domain.PaginatedResult[domain.Experience]{}, err
 	}
 
-	return experiences, nil
+	return domain.NewPaginatedResult(experiences, totalCount, params), nil
 }

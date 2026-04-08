@@ -14,6 +14,6 @@ func NewArticleUsecase(repo domain.ArticleRepository) *ArticleUsecase {
 	return &ArticleUsecase{repo: repo}
 }
 
-func (u *ArticleUsecase) GetAll(ctx context.Context) ([]domain.Article, error) {
-	return u.repo.FindAll(ctx)
+func (u *ArticleUsecase) GetAll(ctx context.Context, params domain.PaginationParams) (domain.PaginatedResult[domain.Article], error) {
+	return u.repo.FindAll(ctx, params)
 }

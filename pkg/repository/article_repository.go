@@ -15,7 +15,13 @@ func NewArticleRepository(db *sql.DB) domain.ArticleRepository {
 	return &articleRepository{db: db}
 }
 
-func (r *articleRepository) FindAll(ctx context.Context) ([]domain.Article, error) {
+func (r *articleRepository) FindAll(ctx context.Context, params domain.PaginationParams) (domain.PaginatedResult[domain.Article], error) {
+	var totalCount int
+	countQuery := `SELECT COUNT(*) FROM articles`
+	if err := r.db.QueryRowContext(ctx, countQuery).Scan(&totalCount); err != nil {
+		return domain.PaginatedResult[domain.Article]{}, err
+	}
+
 	query := `
 		SELECT
 			a.id, a.title, a.content, a.path, a."viewCount", a.likes,
@@ -25,11 +31,12 @@ func (r *articleRepository) FindAll(ctx context.Context) ([]domain.Article, erro
 		FROM articles a
 		LEFT JOIN users u ON a."authorId" = u.id
 		ORDER BY a."createdAt" DESC
+		LIMIT $1 OFFSET $2
 	`
 
-	rows, err := r.db.QueryContext(ctx, query)
+	rows, err := r.db.QueryContext(ctx, query, params.Limit, params.Offset())
 	if err != nil {
-		return nil, err
+		return domain.PaginatedResult[domain.Article]{}, err
 	}
 	defer rows.Close()
 
@@ -47,7 +54,7 @@ func (r *articleRepository) FindAll(ctx context.Context) ([]domain.Article, erro
 			&u.CreatedAt, &u.UpdatedAt,
 		)
 		if err != nil {
-			return nil, err
+			return domain.PaginatedResult[domain.Article]{}, err
 		}
 
 		if userID.Valid {
@@ -59,8 +66,8 @@ func (r *articleRepository) FindAll(ctx context.Context) ([]domain.Article, erro
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return domain.PaginatedResult[domain.Article]{}, err
 	}
 
-	return articles, nil
+	return domain.NewPaginatedResult(articles, totalCount, params), nil
 }

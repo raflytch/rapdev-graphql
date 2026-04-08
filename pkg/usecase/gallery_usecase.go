@@ -14,6 +14,6 @@ func NewGalleryUsecase(repo domain.GalleryRepository) *GalleryUsecase {
 	return &GalleryUsecase{repo: repo}
 }
 
-func (u *GalleryUsecase) GetAll(ctx context.Context) ([]domain.Gallery, error) {
-	return u.repo.FindAll(ctx)
+func (u *GalleryUsecase) GetAll(ctx context.Context, params domain.PaginationParams) (domain.PaginatedResult[domain.Gallery], error) {
+	return u.repo.FindAll(ctx, params)
 }

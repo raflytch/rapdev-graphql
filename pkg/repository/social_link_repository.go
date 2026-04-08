@@ -15,17 +15,24 @@ func NewSocialLinkRepository(db *sql.DB) domain.SocialLinkRepository {
 	return &socialLinkRepository{db: db}
 }
 
-func (r *socialLinkRepository) FindAll(ctx context.Context) ([]domain.SocialLink, error) {
+func (r *socialLinkRepository) FindAll(ctx context.Context, params domain.PaginationParams) (domain.PaginatedResult[domain.SocialLink], error) {
+	var totalCount int
+	countQuery := `SELECT COUNT(*) FROM social_links WHERE "isActive" = true`
+	if err := r.db.QueryRowContext(ctx, countQuery).Scan(&totalCount); err != nil {
+		return domain.PaginatedResult[domain.SocialLink]{}, err
+	}
+
 	query := `
 		SELECT id, title, url, "order", "isActive", "createdAt", "updatedAt"
 		FROM social_links
 		WHERE "isActive" = true
 		ORDER BY "order" ASC
+		LIMIT $1 OFFSET $2
 	`
 
-	rows, err := r.db.QueryContext(ctx, query)
+	rows, err := r.db.QueryContext(ctx, query, params.Limit, params.Offset())
 	if err != nil {
-		return nil, err
+		return domain.PaginatedResult[domain.SocialLink]{}, err
 	}
 	defer rows.Close()
 
@@ -35,14 +42,14 @@ func (r *socialLinkRepository) FindAll(ctx context.Context) ([]domain.SocialLink
 		var s domain.SocialLink
 		err := rows.Scan(&s.ID, &s.Title, &s.URL, &s.Order, &s.IsActive, &s.CreatedAt, &s.UpdatedAt)
 		if err != nil {
-			return nil, err
+			return domain.PaginatedResult[domain.SocialLink]{}, err
 		}
 		links = append(links, s)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return domain.PaginatedResult[domain.SocialLink]{}, err
 	}
 
-	return links, nil
+	return domain.NewPaginatedResult(links, totalCount, params), nil
 }

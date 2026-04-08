@@ -153,3 +153,43 @@ var SocialLinkType = graphql.NewObject(graphql.ObjectConfig{
 		"updatedAt": &graphql.Field{Type: graphql.NewNonNull(DateTimeScalar)},
 	},
 })
+
+var PageInfoType = graphql.NewObject(graphql.ObjectConfig{
+	Name: "PageInfo",
+	Fields: graphql.Fields{
+		"totalCount": &graphql.Field{Type: graphql.NewNonNull(graphql.Int)},
+		"page":       &graphql.Field{Type: graphql.NewNonNull(graphql.Int)},
+		"limit":      &graphql.Field{Type: graphql.NewNonNull(graphql.Int)},
+		"totalPages": &graphql.Field{Type: graphql.NewNonNull(graphql.Int)},
+	},
+})
+
+func newPaginatedType(name string, itemType *graphql.Object) *graphql.Object {
+	return graphql.NewObject(graphql.ObjectConfig{
+		Name: name,
+		Fields: graphql.Fields{
+			"data":     &graphql.Field{Type: graphql.NewNonNull(graphql.NewList(graphql.NewNonNull(itemType)))},
+			"pageInfo": &graphql.Field{Type: graphql.NewNonNull(PageInfoType)},
+		},
+	})
+}
+
+var PaginatedArticleType = newPaginatedType("PaginatedArticles", ArticleType)
+var PaginatedEducationType = newPaginatedType("PaginatedEducations", EducationType)
+var PaginatedExperienceType = newPaginatedType("PaginatedExperiences", ExperienceType)
+var PaginatedProjectType = newPaginatedType("PaginatedProjects", ProjectType)
+var PaginatedGalleryType = newPaginatedType("PaginatedGalleries", GalleryType)
+var PaginatedSocialLinkType = newPaginatedType("PaginatedSocialLinks", SocialLinkType)
+
+var PaginationArgs = graphql.FieldConfigArgument{
+	"page": &graphql.ArgumentConfig{
+		Type:         graphql.Int,
+		DefaultValue: 1,
+		Description:  "Page number (starting from 1)",
+	},
+	"limit": &graphql.ArgumentConfig{
+		Type:         graphql.Int,
+		DefaultValue: 10,
+		Description:  "Number of items per page (max 100)",
+	},
+}

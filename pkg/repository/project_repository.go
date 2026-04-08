@@ -17,17 +17,24 @@ func NewProjectRepository(db *sql.DB) domain.ProjectRepository {
 	return &projectRepository{db: db}
 }
 
-func (r *projectRepository) FindAll(ctx context.Context) ([]domain.Project, error) {
+func (r *projectRepository) FindAll(ctx context.Context, params domain.PaginationParams) (domain.PaginatedResult[domain.Project], error) {
+	var totalCount int
+	countQuery := `SELECT COUNT(*) FROM projects`
+	if err := r.db.QueryRowContext(ctx, countQuery).Scan(&totalCount); err != nil {
+		return domain.PaginatedResult[domain.Project]{}, err
+	}
+
 	query := `
 		SELECT id, title, subtitle, description, image, tags, "demoUrl", "githubUrl",
 		       "createdAt", "updatedAt"
 		FROM projects
 		ORDER BY "createdAt" DESC
+		LIMIT $1 OFFSET $2
 	`
 
-	rows, err := r.db.QueryContext(ctx, query)
+	rows, err := r.db.QueryContext(ctx, query, params.Limit, params.Offset())
 	if err != nil {
-		return nil, err
+		return domain.PaginatedResult[domain.Project]{}, err
 	}
 	defer rows.Close()
 
@@ -40,14 +47,14 @@ func (r *projectRepository) FindAll(ctx context.Context) ([]domain.Project, erro
 			pq.Array(&p.Tags), &p.DemoURL, &p.GithubURL, &p.CreatedAt, &p.UpdatedAt,
 		)
 		if err != nil {
-			return nil, err
+			return domain.PaginatedResult[domain.Project]{}, err
 		}
 		projects = append(projects, p)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return domain.PaginatedResult[domain.Project]{}, err
 	}
 
-	return projects, nil
+	return domain.NewPaginatedResult(projects, totalCount, params), nil
 }

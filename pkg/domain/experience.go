@@ -20,5 +20,5 @@ type Experience struct {
 }
 
 type ExperienceRepository interface {
-	FindAll(ctx context.Context) ([]Experience, error)
+	FindAll(ctx context.Context, params PaginationParams) (PaginatedResult[Experience], error)
 }

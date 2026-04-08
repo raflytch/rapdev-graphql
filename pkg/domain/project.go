@@ -19,5 +19,5 @@ type Project struct {
 }
 
 type ProjectRepository interface {
-	FindAll(ctx context.Context) ([]Project, error)
+	FindAll(ctx context.Context, params PaginationParams) (PaginatedResult[Project], error)
 }

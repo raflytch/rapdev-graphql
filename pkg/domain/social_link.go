@@ -16,5 +16,5 @@ type SocialLink struct {
 }
 
 type SocialLinkRepository interface {
-	FindAll(ctx context.Context) ([]SocialLink, error)
+	FindAll(ctx context.Context, params PaginationParams) (PaginatedResult[SocialLink], error)
 }
