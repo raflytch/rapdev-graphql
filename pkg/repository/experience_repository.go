@@ -5,8 +5,6 @@ import (
 	"database/sql"
 
 	"rapdev-graphql/pkg/domain"
-
-	"github.com/lib/pq"
 )
 
 type experienceRepository struct {
@@ -44,7 +42,7 @@ func (r *experienceRepository) FindAll(ctx context.Context, params domain.Pagina
 		var e domain.Experience
 		err := rows.Scan(
 			&e.ID, &e.Company, &e.Position, &e.Type, &e.Logo, &e.StartDate, &e.EndDate,
-			pq.Array(&e.Tags), pq.Array(&e.Description), &e.CreatedAt, &e.UpdatedAt,
+			(*stringArray)(&e.Tags), (*stringArray)(&e.Description), &e.CreatedAt, &e.UpdatedAt,
 		)
 		if err != nil {
 			return domain.PaginatedResult[domain.Experience]{}, err

@@ -5,8 +5,6 @@ import (
 	"database/sql"
 
 	"rapdev-graphql/pkg/domain"
-
-	"github.com/lib/pq"
 )
 
 type projectRepository struct {
@@ -44,7 +42,7 @@ func (r *projectRepository) FindAll(ctx context.Context, params domain.Paginatio
 		var p domain.Project
 		err := rows.Scan(
 			&p.ID, &p.Title, &p.Subtitle, &p.Description, &p.Image,
-			pq.Array(&p.Tags), &p.DemoURL, &p.GithubURL, &p.CreatedAt, &p.UpdatedAt,
+			(*stringArray)(&p.Tags), &p.DemoURL, &p.GithubURL, &p.CreatedAt, &p.UpdatedAt,
 		)
 		if err != nil {
 			return domain.PaginatedResult[domain.Project]{}, err
